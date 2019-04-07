@@ -1,4 +1,4 @@
-import { SOUNDS } from './constants';
+import { sounds } from './resources';
 
 class Player {
     recording = false;
@@ -6,8 +6,8 @@ class Player {
     times = [];
 
     play(key) {
-        if (SOUNDS[key]) {
-            const sound = SOUNDS[key];
+        if (sounds[key]) {
+            const sound = sounds[key];
 
             const audio = new Audio(sound);
             audio.onended = audio.remove;
@@ -26,7 +26,7 @@ class Player {
         for (let i = 0; i < this.queue.length; ++i) {
             const key = this.queue[i];
 
-            const audio = new Audio(SOUNDS[key]);
+            const audio = new Audio(sounds[key]);
             if (endCallback && i === this.queue.length - 1) {
                 audio.onended = () => {
                     audio.remove();

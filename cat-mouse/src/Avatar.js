@@ -8,6 +8,7 @@ class Avatar extends Component {
     return (
       <div className="Avatar"
         style={{
+          visibility: this.props.isHidden ? 'hidden' : 'visible',
           backgroundColor: this.props.color,
           left: 'calc(' + this.position[this.props.x] + 'vw - var(--dimension) / 2)',
           top: 'calc(' + this.position[this.props.y] + 'vh - var(--dimension) / 2)'

@@ -1,8 +1,8 @@
 import React, { Component } from 'react';
 import './App.css';
-import shatter from './sounds/shatter.wav';
+import smack from './sounds/smack.wav';
 
-import {DEFAULT_COLOR, COLORS} from './constants';
+import {DEFAULT_COLOR, colors, randomizeResources} from './resources';
 
 import Avatar from './Avatar';
 import Player from './Player';
@@ -16,7 +16,11 @@ class App extends Component {
 
   constructor(props) {
     super(props);
-    this.state = { color: DEFAULT_COLOR, x: 1, y: 1 };
+
+    const mx = this.mouse.position % 3;
+    const my = Math.floor(this.mouse.position / 3);
+
+    this.state = { color: DEFAULT_COLOR, x: 1, y: 1, mx: mx, my: my };
     this.player.recording = true;
 
     this.resetState = this.resetState.bind(this);
@@ -32,13 +36,15 @@ class App extends Component {
     this.player.clearRecording();
     this.player.recording = true;
 
+    randomizeResources();
+
     this.white = true;
   }
 
   moveAvatar(position, colorChange = true) {
     clearTimeout(this.timer);
 
-    const color = colorChange ? COLORS[position] : DEFAULT_COLOR;
+    const color = colorChange ? colors[position] : DEFAULT_COLOR;
     this.setState({ 
       color: color, 
       x: position % 3, 
@@ -52,17 +58,20 @@ class App extends Component {
   }
 
   updatePositions(position) {
-    const caughtMouse = this.mouse.updateCat(position);
+    const mx = this.mouse.position % 3;
+    const my = Math.floor(this.mouse.position / 3);
+    this.setState({mx: mx, my: my});
 
+    const caughtMouse = this.mouse.updateCat(position);
     if (caughtMouse) {
       this.white = false;
       this.player.recording = false;
 
-      const audio = new Audio(shatter);
+      const audio = new Audio(smack);
       audio.onended = () => {
         if (this.player.queue.length > 0) {
           this.player.reverseRecording();
-          this.player.playRecording(this.moveAvatar, this.resetState);
+          this.player.playRecording(this.moveAvatar, this.resetState, 1.5);
         } else {
           this.resetState();
         }
@@ -90,16 +99,16 @@ class App extends Component {
     if (y > 2 * h / 3) pos += 3;
 
     this.moveAvatar(pos);
-    this.player.play(pos);
+    if (this.white) this.player.play(pos);
   }
 
   keyListener(event) {
     if (!this.white) return;
 
     const key = +event.key - 1;
-    if (COLORS[key]) {
+    if (colors[key]) {
       this.moveAvatar(key);
-      this.player.play(key);
+      if (this.white) this.player.play(key);
     }
   }
   
@@ -109,6 +118,7 @@ class App extends Component {
            onKeyDown={this.keyListener}
            onMouseDown={this.mouseListener}
            style={{backgroundColor: this.state.color}}>
+        <Avatar x={this.state.mx} y={this.state.my} color={DEFAULT_COLOR} isHidden={!this.white}/>
         <Avatar x={this.state.x} y={this.state.y} color={this.white ? "white" : "black"}/>
       </div>
     );
