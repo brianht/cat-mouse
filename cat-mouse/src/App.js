@@ -22,6 +22,7 @@ class App extends Component {
     this.resetState = this.resetState.bind(this);
     this.moveAvatar = this.moveAvatar.bind(this);
     this.keyListener = this.keyListener.bind(this);
+    this.mouseListener = this.mouseListener.bind(this);
   }
 
   resetState() {
@@ -55,16 +56,41 @@ class App extends Component {
 
     if (caughtMouse) {
       this.white = false;
+      this.player.recording = false;
 
       const audio = new Audio(shatter);
       audio.onended = () => {
-        //this.player.reverseRecording();
-        this.player.playRecording(this.moveAvatar, this.resetState);
+        if (this.player.queue.length > 0) {
+          this.player.reverseRecording();
+          this.player.playRecording(this.moveAvatar, this.resetState);
+        } else {
+          this.resetState();
+        }
       }
       audio.play();
     }
 
     return caughtMouse;
+  }
+
+  mouseListener(event) {
+    if (!this.white) return;
+
+    const x = event.clientX;
+    const y = event.clientY;
+
+    const e = document.getElementsByClassName('App')[0];
+    const h = e.clientHeight;
+    const w = e.clientWidth;
+
+    let pos = 0;
+    if (x > w / 3) pos += 1;
+    if (x > 2 * w / 3) pos += 1;
+    if (y > h / 3) pos += 3;
+    if (y > 2 * h / 3) pos += 3;
+
+    this.moveAvatar(pos);
+    this.player.play(pos);
   }
 
   keyListener(event) {
@@ -81,6 +107,7 @@ class App extends Component {
     return (
       <div className="App" tabIndex="0"
            onKeyDown={this.keyListener}
+           onMouseDown={this.mouseListener}
            style={{backgroundColor: this.state.color}}>
         <Avatar x={this.state.x} y={this.state.y} color={this.white ? "white" : "black"}/>
       </div>
