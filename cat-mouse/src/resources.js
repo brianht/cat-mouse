@@ -4,7 +4,6 @@ import crinkel from './sounds/crinkel.wav';
 import cut from './sounds/cut.wav';
 import creak from './sounds/creak.wav';
 import indicator from './sounds/indicator.wav';
-import shatter from './sounds/shatter.wav';
 import spin from './sounds/spin.wav';
 import splash from './sounds/splash.wav';
 import tear from './sounds/tear.wav';
@@ -12,7 +11,7 @@ import tear from './sounds/tear.wav';
 export const sounds = [
     click, crinkel, cut,
     indicator, spin, splash,
-    tear, creak, bell, shatter
+    tear, creak, bell
 ];
 
 export const colors = [ 
