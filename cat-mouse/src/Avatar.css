@@ -1,0 +1,15 @@
+.Avatar {
+    --dimension: 10vw;
+    
+    position: fixed;
+    top: calc(50% - var(--dimension) / 2);
+    left: calc(50% - var(--dimension) / 2);
+
+    width: var(--dimension);
+    height:  var(--dimension);
+    border-radius: var(--dimension);
+    
+    background-color: white;
+
+    transition: top 300ms ease, left 300ms ease, background-color 300ms ease-out;
+}
