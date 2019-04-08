@@ -58,11 +58,13 @@ class App extends Component {
   }
 
   updatePositions(position) {
+
     const mx = this.mouse.position % 3;
     const my = Math.floor(this.mouse.position / 3);
     this.setState({mx: mx, my: my});
 
     const caughtMouse = this.mouse.updateCat(position);
+
     if (caughtMouse) {
       this.white = false;
       this.player.recording = false;
@@ -70,8 +72,8 @@ class App extends Component {
       const audio = new Audio(smack);
       audio.onended = () => {
         if (this.player.queue.length > 0) {
-          this.player.reverseRecording();
-          this.player.playRecording(this.moveAvatar, this.resetState, 1.5);
+          //this.player.reverseRecording();
+          this.player.playRecording(this.moveAvatar, this.resetState);
         } else {
           this.resetState();
         }

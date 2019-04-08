@@ -2,7 +2,7 @@ import React, { Component } from 'react';
 import './Avatar.css';
 
 class Avatar extends Component {
-  position = [25, 50, 75];
+  position = [20, 50, 80];
 
   render() {
     return (
