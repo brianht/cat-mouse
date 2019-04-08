@@ -1,4 +1,4 @@
-import { sounds } from './resources';
+import { sounds, cachedAudio } from './resources';
 
 class Player {
     recording = false;
@@ -6,44 +6,46 @@ class Player {
     times = [];
 
     play(key) {
-        if (sounds[key]) {
-            const sound = sounds[key];
-
+        const sound = sounds[key];
+        if (!sound) return;
+        
+        const cached = cachedAudio[key];
+        if (cached.paused || !cached.duration) {
+            cached.play();
+        } else {
             const audio = new Audio(sound);
             audio.onended = audio.remove;
             audio.play();
-            
-            if (this.recording) {
-                this.queue.push(key);
-                this.times.push((new Date()).getTime());
-            }
+        }
+
+        if (this.recording) {
+            this.queue.push(key);
+            this.times.push((new Date()).getTime());
         }
     }
 
     playRecording(initCallback = null, endCallback = null, speed = 1) {
-        let start = this.times[0];
-        
-        for (let i = 0; i < this.queue.length; ++i) {
+        const playback = (i) => {
             const key = this.queue[i];
+            if (initCallback) initCallback(key);
 
             const audio = new Audio(sounds[key]);
-            if (endCallback && i === this.queue.length - 1) {
+            
+            if (this.times.length - 1 === i) {
                 audio.onended = () => {
+                    if (endCallback) endCallback();
                     audio.remove();
-                    endCallback();
                 }
+                audio.play();
             } else {
                 audio.onended = audio.remove;
-            }
+                audio.play();
 
-            const time = Math.abs(this.times[i] - start) / speed;
-            setTimeout(
-                () => {
-                    if (initCallback) initCallback(key);
-                    audio.play();
-                },
-            time);
+                const next = Math.floor(this.times[i + 1] - this.times[i]) / speed;
+                setTimeout(() => playback(i + 1), next);
+            }
         }
+        playback(0);
     }
 
     reverseRecording() {

@@ -11,8 +11,14 @@ import Occupant from './Occupant';
 class App extends Component {
   timer = null;
   white = true;
+  lastKey = null;
   occupant = new Occupant(4, 9);
   player = new Player();
+  keyMap = {
+    'w': 0, 's': 1, 'a': 2,
+    'd': 3, 'f': 4, 'ArrowLeft': 5,
+    'ArrowUp': 6, 'ArrowDown': 7, 'ArrowRight': 8
+  }
 
   constructor(props) {
     super(props);
@@ -58,7 +64,6 @@ class App extends Component {
   }
 
   updatePositions(position) {
-
     const ox = this.occupant.position % 3;
     const oy = Math.floor(this.occupant.position / 3);
     this.setState({ox: ox, oy: oy});
@@ -72,7 +77,6 @@ class App extends Component {
       const audio = new Audio(smack);
       audio.onended = () => {
         if (this.player.queue.length > 0) {
-          //this.player.reverseRecording();
           this.player.playRecording(this.moveAvatar, this.resetState);
         } else {
           this.resetState();
@@ -107,7 +111,8 @@ class App extends Component {
   keyListener(event) {
     if (!this.white) return;
 
-    const key = +event.key - 1;
+    let key = +event.key - 1;
+    if (isNaN(key)) key = this.keyMap[event.key];
     if (colors[key]) {
       this.moveAvatar(key);
       if (this.white) this.player.play(key);
