@@ -1,14 +1,14 @@
-class Mouse {
+class Occupant {
     weights = [];
     position = 0;
-    constructor(catPosition, totalPositions) {
-        this.resetState(catPosition, totalPositions);
+    constructor(userPosition, totalPositions) {
+        this.resetState(userPosition, totalPositions);
     }
 
-    resetState(catPosition, totalPositions) {
+    resetState(userPosition, totalPositions) {
         this.weights = [];
         for (let i = 0; i < totalPositions; i++) this.weights.push(totalPositions);
-        this.weights[catPosition] = 0;
+        this.weights[userPosition] = 0;
         this.updatePosition();
     }
 
@@ -30,7 +30,7 @@ class Mouse {
         }
     }
 
-    updateCat(position) {
+    updateUser(position) {
         if (position === this.position) {
             return true;
         }
@@ -41,4 +41,4 @@ class Mouse {
     }
 }
 
-export default Mouse;
+export default Occupant;

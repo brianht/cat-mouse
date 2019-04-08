@@ -6,21 +6,21 @@ import {DEFAULT_COLOR, colors, randomizeResources} from './resources';
 
 import Avatar from './Avatar';
 import Player from './Player';
-import Mouse from './Mouse';
+import Occupant from './Occupant';
 
 class App extends Component {
   timer = null;
   white = true;
-  mouse = new Mouse(4, 9);
+  occupant = new Occupant(4, 9);
   player = new Player();
 
   constructor(props) {
     super(props);
 
-    const mx = this.mouse.position % 3;
-    const my = Math.floor(this.mouse.position / 3);
+    const ox = this.occupant.position % 3;
+    const oy = Math.floor(this.occupant.position / 3);
 
-    this.state = { color: DEFAULT_COLOR, x: 1, y: 1, mx: mx, my: my };
+    this.state = { color: DEFAULT_COLOR, x: 1, y: 1, ox: ox, oy: oy };
     this.player.recording = true;
 
     this.resetState = this.resetState.bind(this);
@@ -31,7 +31,7 @@ class App extends Component {
 
   resetState() {
     this.moveAvatar(4, false);
-    this.mouse.resetState(4, 9);
+    this.occupant.resetState(4, 9);
 
     this.player.clearRecording();
     this.player.recording = true;
@@ -59,13 +59,13 @@ class App extends Component {
 
   updatePositions(position) {
 
-    const mx = this.mouse.position % 3;
-    const my = Math.floor(this.mouse.position / 3);
-    this.setState({mx: mx, my: my});
+    const ox = this.occupant.position % 3;
+    const oy = Math.floor(this.occupant.position / 3);
+    this.setState({ox: ox, oy: oy});
 
-    const caughtMouse = this.mouse.updateCat(position);
+    const occupied = this.occupant.updateUser(position);
 
-    if (caughtMouse) {
+    if (occupied) {
       this.white = false;
       this.player.recording = false;
 
@@ -81,7 +81,7 @@ class App extends Component {
       audio.play();
     }
 
-    return caughtMouse;
+    return occupied;
   }
 
   mouseListener(event) {
@@ -120,7 +120,7 @@ class App extends Component {
            onKeyDown={this.keyListener}
            onMouseDown={this.mouseListener}
            style={{backgroundColor: this.state.color}}>
-        <Avatar x={this.state.mx} y={this.state.my} color={DEFAULT_COLOR} isHidden={!this.white}/>
+        <Avatar x={this.state.ox} y={this.state.oy} color={DEFAULT_COLOR} isHidden={!this.white}/>
         <Avatar x={this.state.x} y={this.state.y} color={this.white ? "white" : "black"}/>
       </div>
     );
