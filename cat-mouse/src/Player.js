@@ -29,18 +29,11 @@ class Player {
             const key = this.queue[i];
             if (initCallback) initCallback(key);
 
-            const audio = new Audio(sounds[key]);
-            
-            if (this.times.length - 1 === i) {
-                audio.onended = () => {
-                    if (endCallback) endCallback();
-                    audio.remove();
-                }
-                audio.play();
-            } else {
-                audio.onended = audio.remove;
-                audio.play();
+            this.play(key);
 
+            if (this.times.length - 1 === i) {
+                if (endCallback) setTimeout(endCallback, cachedAudio[key].duration * 1000);
+            } else {
                 const next = Math.floor(this.times[i + 1] - this.times[i]) / speed;
                 setTimeout(() => playback(i + 1), next);
             }
