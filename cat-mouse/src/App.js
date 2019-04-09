@@ -12,6 +12,7 @@ class App extends Component {
   timer = null;
   white = true;
   lastKey = null;
+  smack = new Audio(smack);
   occupant = new Occupant(4, 9);
   player = new Player();
   keyMap = {
@@ -25,9 +26,16 @@ class App extends Component {
 
     const ox = this.occupant.position % 3;
     const oy = Math.floor(this.occupant.position / 3);
-
     this.state = { color: DEFAULT_COLOR, x: 1, y: 1, ox: ox, oy: oy };
     this.player.recording = true;
+
+    this.smack.onended = () => {
+      if (this.player.queue.length > 0) {
+        this.player.playRecording(this.moveAvatar, this.resetState);
+      } else {
+        this.resetState();
+      }
+    }
 
     this.resetState = this.resetState.bind(this);
     this.moveAvatar = this.moveAvatar.bind(this);
@@ -73,16 +81,7 @@ class App extends Component {
     if (occupied) {
       this.white = false;
       this.player.recording = false;
-
-      const audio = new Audio(smack);
-      audio.onended = () => {
-        if (this.player.queue.length > 0) {
-          this.player.playRecording(this.moveAvatar, this.resetState);
-        } else {
-          this.resetState();
-        }
-      }
-      audio.play();
+      this.smack.play();
     }
 
     return occupied;

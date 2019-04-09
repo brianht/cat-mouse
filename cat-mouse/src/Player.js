@@ -10,7 +10,7 @@ class Player {
         if (!sound) return;
         
         const cached = cachedAudio[key];
-        if (cached.paused || !cached.duration) {
+        if (cached.paused || !cached.currentTime || !cached.duration) {
             cached.play();
         } else {
             const audio = new Audio(sound);
