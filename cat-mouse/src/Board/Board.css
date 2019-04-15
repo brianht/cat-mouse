@@ -1,0 +1,9 @@
+.Board {
+    width: 100vw;
+    height: 100vh;
+
+    outline: none;
+
+    background-color: #282c34;
+    transition: background-color 300ms ease-out;
+}

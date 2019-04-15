@@ -1,4 +1,4 @@
-import { sounds, cachedAudio } from './resources';
+import { sounds, cachedAudio } from '../resources';
 
 class Player {
     recording = false;

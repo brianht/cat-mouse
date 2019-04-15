@@ -1,6 +1,6 @@
 import bell from './sounds/bell.wav';
 import click from './sounds/click.wav';
-import crinkel from './sounds/crinkel.wav';
+import crinkle from './sounds/crinkle.wav';
 import cut from './sounds/cut.wav';
 import creak from './sounds/creak.wav';
 import indicator from './sounds/indicator.wav';
@@ -11,7 +11,7 @@ import tear from './sounds/tear.wav';
 const RESOURCE_COUNT = 9;
 
 export const sounds = [
-    click, crinkel, cut,
+    click, crinkle, cut,
     indicator, spin, splash,
     tear, creak, bell
 ];
