@@ -7,13 +7,11 @@ import Avatar from './Avatar/Avatar';
 import { DEFAULT_COLOR, colors, randomizeResources } from '../resources';
 
 class Board extends Component {
-    white = true;
     coordinateType = {
         'user': ['ux', 'uy'],
         'occupant': ['ox', 'oy']
     }
 
-    lastKey = null;
     keyMap = {
         'w': 0, 's': 1, 'a': 2,
         'd': 3, 'f': 4, 'ArrowLeft': 5,
@@ -22,6 +20,9 @@ class Board extends Component {
 
     constructor(props) {
         super(props);
+
+        this.white = true;
+        this.lastKey = null;
 
         this.size = props.size;
         this.dimension = Math.ceil(Math.sqrt(this.size));
@@ -46,10 +47,8 @@ class Board extends Component {
             }
         }
 
-        this.resetState = this.resetState.bind(this);
-        this.moveAvatar = this.moveAvatar.bind(this);
-        this.keyListener = this.keyListener.bind(this);
-        this.mouseListener = this.mouseListener.bind(this);
+        const bind = (...fs) => fs.forEach(f => this[f.name] = f.bind(this));
+        bind(this.resetState, this.moveAvatar, this.mouseListener, this.keyDownListener, this.keyUpListener);
     }
 
     resetState() {
@@ -126,19 +125,28 @@ class Board extends Component {
         this.moveAvatar(pos);
     }
 
-    keyListener(event) {
+    keyDownListener(event) {
         if (!this.white) return;
 
         let key = +event.key - 1;
         if (isNaN(key)) key = this.keyMap[event.key];
-        if (key + 1) this.moveAvatar(key);
+        if (key + 1 && this.lastKey !== key) {
+            this.lastKey = key;
+            this.moveAvatar(key);
+        }
     }
 
+    keyUpListener() {
+        this.lastKey = null;
+    }
+    
     render() {
         return (
         <div className="Board" tabIndex="0"
              style={{backgroundColor: this.state.color}}
-             onKeyDown={this.keyListener} onMouseDown={this.mouseListener}>
+             onMouseDown={this.mouseListener}
+             onKeyDown={this.keyDownListener}
+             onKeyUp={this.keyUpListener}>
             <Avatar id="Occupant" color={DEFAULT_COLOR} isHidden={!this.white}
                     x={this.state.ox}
                     y={this.state.oy}/>
