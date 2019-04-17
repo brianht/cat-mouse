@@ -211,7 +211,7 @@ class Board extends Component {
              onMouseDown={this.mouseListener}
              onKeyDown={this.keyDownListener}
              onKeyUp={this.keyUpListener}>
-            <Avatar id="Occupant" color={DEFAULT_COLOR} isHidden={!this.whiteaf}
+            <Avatar id="Occupant" color={DEFAULT_COLOR} isHidden={!this.white}
                     x={this.state.ox}
                     y={this.state.oy}/>
             <Avatar id="User" color={this.white ? "white" : "black"}
