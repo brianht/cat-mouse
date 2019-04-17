@@ -4,25 +4,72 @@ import smack from '../sounds/smack.wav';
 import Occupant from './Occupant';
 import Player from './Player';
 import Avatar from './Avatar/Avatar';
-import { DEFAULT_COLOR, colors, randomizeResources } from '../resources';
+import { DEFAULT_COLOR, colors, randomizeResources, soundId } from '../resources';
 
-class Board extends Component {
+class Board extends Component {    
     coordinateType = {
         'user': ['ux', 'uy'],
         'occupant': ['ox', 'oy']
     }
 
     keyMap = {
-        'w': 0, 's': 1, 'a': 2,
-        'd': 3, 'f': 4, 'ArrowLeft': 5,
-        'ArrowUp': 6, 'ArrowDown': 7, 'ArrowRight': 8
+        'w': 2, 'a': 5, 's': 8,
+        'd': 1, 'f': 4, 'g': 7,
+        'ArrowRight': 0, 'ArrowUp': 3, 'ArrowLeft': 6
     }
+
+    rules = {
+        beckoning: {
+            effect: 0,
+            patterns: []
+        },
+        warding: {
+            effect: 0,
+            patterns: []
+        },
+        shielding: {
+            effect: 0,
+            patterns: []
+        },
+        chance: {
+            effect: 0,
+            patterns: []
+        }
+    }
+
+    synthetic = {
+        entertainment: {
+            id: 10,
+            pattern: []
+        },
+        financial: {
+            id: 20,
+            patterns: []
+        },
+        existential: {
+            id: 30,
+            patterns: []
+        },
+        hedonism: {
+            id: 100,
+            pattern: []
+        },
+        greed: {
+            id: 200,
+            pattern: []
+        },
+        conflict: {
+            id: 300,
+            pattern: []
+        }
+    }
+
+    history = [];
 
     constructor(props) {
         super(props);
 
         this.white = true;
-        this.lastKey = null;
 
         this.size = props.size;
         this.dimension = Math.ceil(Math.sqrt(this.size));
@@ -46,9 +93,11 @@ class Board extends Component {
                 this.resetState();
             }
         }
-
-        const bind = (...fs) => fs.forEach(f => this[f.name] = f.bind(this));
-        bind(this.resetState, this.moveAvatar, this.mouseListener, this.keyDownListener, this.keyUpListener);
+        this.resetState = this.resetState.bind(this);
+        this.moveAvatar = this.moveAvatar.bind(this);
+        this.mouseListener = this.mouseListener.bind(this);
+        this.keyDownListener = this.keyDownListener.bind(this);
+        this.keyUpListener = this.keyUpListener.bind(this);
     }
 
     resetState() {
@@ -85,14 +134,29 @@ class Board extends Component {
         const occupantPosition = this.getXY(this.occupant.position, this.coordinateType.occupant);
         this.setState(occupantPosition);
 
-        const occupied = this.occupant.updateUser(position);
+        let occupied = false;
+        (!this.rules.shielding) ? occupied = this.occupant.updateUser(position) : this.rules.shielding -= 1;
 
         if (occupied) {
             this.white = false;
             this.player.recording = false;
             this.smack.play();
         } else {
+            this.history.push(soundId[position]);
             this.player.play(position);
+
+            // TODO: Special Rules
+            /* if (this.history.length >= 3) {
+                const ids = [];
+                for (let i = 0; i < 3; i++) ids.push(this.history.pop());
+                const orderedIds = ids.sort((a, b) => a - b);
+
+                if (orderedIds[0] === orderedIds[1] === orderedIds[2]) {
+                    const type = ids[0];
+                } else {
+                    
+                }
+            } */
         }
 
         return occupied;
@@ -147,7 +211,7 @@ class Board extends Component {
              onMouseDown={this.mouseListener}
              onKeyDown={this.keyDownListener}
              onKeyUp={this.keyUpListener}>
-            <Avatar id="Occupant" color={DEFAULT_COLOR} isHidden={!this.white}
+            <Avatar id="Occupant" color={DEFAULT_COLOR} isHidden={!this.whiteaf}
                     x={this.state.ox}
                     y={this.state.oy}/>
             <Avatar id="User" color={this.white ? "white" : "black"}

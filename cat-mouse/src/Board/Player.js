@@ -1,4 +1,4 @@
-import { sounds, cachedAudio } from '../resources';
+import { getSound, getCached } from '../resources';
 
 class Player {
     recording = false;
@@ -6,10 +6,10 @@ class Player {
     times = [];
 
     play(key) {
-        const sound = sounds[key];
+        const sound = getSound(key);
         if (!sound) return;
         
-        const cached = cachedAudio[key];
+        const cached = getCached(key);
         if (cached.paused || !cached.currentTime || !cached.duration) {
             cached.play();
         } else {
@@ -32,7 +32,7 @@ class Player {
             this.play(key);
 
             if (this.times.length - 1 === i) {
-                if (endCallback) setTimeout(endCallback, cachedAudio[key].duration * 1000);
+                if (endCallback) setTimeout(endCallback, getCached(key).duration * 1000);
             } else {
                 const next = Math.floor(this.times[i + 1] - this.times[i]) / speed;
                 setTimeout(() => playback(i + 1), next);

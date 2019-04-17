@@ -10,13 +10,29 @@ import tear from './sounds/tear.wav';
 
 const RESOURCE_COUNT = 9;
 
-export const sounds = [
+export const soundEnum = {
+    click: 0, crinkle: 1, cut: 2,
+    indicator: 3, spin: 4, splash: 5,
+    tear: 6, creak: 7, bell: 8
+}
+
+export const soundMap = [
     click, crinkle, cut,
     indicator, spin, splash,
     tear, creak, bell
-];
+]
 
-export const cachedAudio = Array.from(sounds, sound => new Audio(sound));
+export const soundId = [0, 1, 2, 3, 4, 5, 6, 7, 8];
+
+export function getSound(key) {
+    return soundMap[soundId[key]];
+}
+
+export const audioCache = Array.from(soundMap, sound => new Audio(sound));
+
+export function getCached(key) {
+    return audioCache[soundId[key]];
+}
 
 export const colors = [ 
     'gold', 'turquoise', 'springgreen',
@@ -24,7 +40,7 @@ export const colors = [
     'orange', 'yellowgreen', 'hotpink'
 ];
 
-const RESOURCES = [sounds, cachedAudio, colors];
+const RESOURCES = [soundId, colors];
 
 export function randomizeResources() {
     for (let i = RESOURCE_COUNT - 1; i > 0; i--) {
