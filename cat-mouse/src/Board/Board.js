@@ -4,7 +4,7 @@ import smack from '../sounds/smack.wav';
 import Occupant from './Occupant';
 import Player from './Player';
 import Avatar from './Avatar/Avatar';
-import { DEFAULT_COLOR, colors, randomizeResources, soundId } from '../resources';
+import { DEFAULT_COLOR, colors, randomizeResources, soundId, soundEnum } from '../resources';
 
 class Board extends Component {    
     coordinateType = {
@@ -19,52 +19,65 @@ class Board extends Component {
     }
 
     rules = {
-        beckoning: {
-            effect: 0,
-            patterns: []
-        },
-        warding: {
-            effect: 0,
-            patterns: []
-        },
-        shielding: {
-            effect: 0,
-            patterns: []
-        },
-        chance: {
-            effect: 0,
-            patterns: []
-        }
+        beckoning: 0,
+        warding: 0,
+        shielding: 0,
+        chance: 0
     }
 
-    synthetic = {
-        entertainment: {
-            id: 10,
-            pattern: []
+    rulePatterns = [
+        {
+            key: 'beckoning',
+            patterns: [soundEnum.bell, soundEnum.creak, soundEnum.crinkle]
         },
-        financial: {
-            id: 20,
-            patterns: []
+        {
+            key: 'warding',
+            patterns: [soundEnum.cut, soundEnum.tear, soundEnum.splash]
         },
-        existential: {
-            id: 30,
-            patterns: []
+        {
+            key: 'shielding',
+            patterns: [soundEnum.indicator, soundEnum.click]
         },
-        hedonism: {
-            id: 100,
-            pattern: []
-        },
-        greed: {
-            id: 200,
-            pattern: []
-        },
-        conflict: {
-            id: 300,
-            pattern: []
+        {
+            key: 'chance',
+            patterns: [soundEnum.spin]
         }
-    }
+    ]
+
+    orderFunc = (a, b) => a - b;
+
+    synthetic1 = [
+        {
+            id: soundEnum.laser,
+            pattern: [soundEnum.splash, soundEnum.crinkle, soundEnum.cut].sort(this.orderFunc)
+        },
+        {
+            id: soundEnum.register,
+            pattern: [soundEnum.bell, soundEnum.click, soundEnum.spin].sort(this.orderFunc)
+        },
+        {
+            id: soundEnum.siren,
+            pattern: [soundEnum.indicator, soundEnum.creak, soundEnum.tear].sort(this.orderFunc)
+        }
+    ]
+
+    synthetic2 = [
+        {
+            id: soundEnum.slots,
+            pattern: [soundEnum.laser, soundEnum.register].sort(this.orderFunc)
+        },
+        {
+            id: soundEnum.violin,
+            pattern: [soundEnum.register, soundEnum.siren].sort(this.orderFunc)
+        },
+        {
+            id: soundEnum.blast,
+            pattern: [soundEnum.siren, soundEnum.laser].sort(this.orderFunc)
+        }
+    ]
 
     history = [];
+    synthHistory = [];
 
     constructor(props) {
         super(props);
@@ -75,6 +88,7 @@ class Board extends Component {
         this.dimension = Math.ceil(Math.sqrt(this.size));
         this.center = Math.floor(this.size / 2);
         const userCoordinates = this.getXY(this.center, this.coordinateType.user);
+        this.position = this.center;
 
         this.occupant = new Occupant(this.center, this.size);
         const occupantCoordinates = this.getXY(this.occupant.position, this.coordinateType.occupant);
@@ -114,6 +128,7 @@ class Board extends Component {
 
     moveAvatar(position, colorChange = true) {
         if (position < 0 || position > this.size - 1) return;
+        this.position = position;
 
         clearTimeout(this.timer);
 
@@ -135,31 +150,94 @@ class Board extends Component {
         this.setState(occupantPosition);
 
         let occupied = false;
-        (!this.rules.shielding) ? occupied = this.occupant.updateUser(position) : this.rules.shielding -= 1;
+        if (this.rules.shielding) {
+            this.rules.shielding -= 1;
+        } else {
+            if (this.rules.chance) {
+                this.occupant.resetState(this.position, this.size);
+                this.rules.chance -= 1;
+            }
+            if (this.rules.beckoning) {
+                const adj = this.getAdjacent(this.position);
+                for (let i = 0; i < this.occupant.weights.length; i++) {
+                    this.occupant.weights[i] = adj.includes(i) ? 1 : 0;
+                }
+            }
+            if (this.rules.warding) {
+                const adj = this.getAdjacent(this.position);
+                for (let i = 0; i < this.occupant.weights.length; i++) {
+                    this.occupant.weights[i] = adj.includes(i) ? 0 : 1;
+                }
+            }
+            occupied = this.occupant.updateUser(position)
+        }
 
         if (occupied) {
+            // Lose condition
             this.white = false;
             this.player.recording = false;
             this.smack.play();
         } else {
+            // Special rules
+            let played = false;
             this.history.push(soundId[position]);
-            this.player.play(position);
-
-            // TODO: Special Rules
-            /* if (this.history.length >= 3) {
+            if (this.synthHistory.length === 2) {
+                this.synthHistory.sort(this.orderFunc);
+                this.synthetic2.forEach(synthesis => {
+                    if (this.arrayComp(this.synthHistory, synthesis.pattern)) {
+                        played = true;
+                        this.player.play(synthesis.id);
+                        this.history.pop();
+                    }
+                });
+                this.synthHistory = [];
+            } else if (this.history.length >= 3) {
                 const ids = [];
-                for (let i = 0; i < 3; i++) ids.push(this.history.pop());
-                const orderedIds = ids.sort((a, b) => a - b);
-
-                if (orderedIds[0] === orderedIds[1] === orderedIds[2]) {
-                    const type = ids[0];
-                } else {
-                    
+                const orderedIds = [];
+                for (let i = 0; i < 3; i++) {
+                    const id = this.history.shift();
+                    ids.push(id);
+                    orderedIds.push(id);
                 }
-            } */
+                orderedIds.sort(this.orderFunc);
+                
+                if (orderedIds[0] === orderedIds[1] && orderedIds[1] === orderedIds[2]) {
+                    const type = ids[0];
+                    for (let i = 0; i < this.rulePatterns.length; i++) {
+                        const rule = this.rulePatterns[i];
+                        if (rule.patterns.includes(type)) {
+                            this.rules[rule.key] = 3;
+                        }
+                    }
+                    played = true;
+                    this.player.play(position, 3);
+                } else {
+                    this.synthetic1.forEach(synthesis => {
+                        if (this.arrayComp(orderedIds, synthesis.pattern)) {
+                            played = true;
+                            this.player.play(synthesis.id);
+                            this.synthHistory.push(synthesis.id);
+                        }
+                    });
+                }
+                if (!played) {
+                    ids.shift();
+                    this.history.unshift(...ids);
+                }
+            }
+            if (!played) this.player.play(position);
         }
 
         return occupied;
+    }
+
+    arrayComp(a, b) {
+        for (let i = 0; i < a.length; i++) {
+            const ai = a[i];
+            const bi = b[i];
+            if (ai !== bi) return false;
+        }
+        return true;
     }
 
     getXY(position, coordinateType) {
@@ -169,6 +247,19 @@ class Board extends Component {
         coordinates[coordinateType[1]] = Math.floor(position / this.dimension);
         
         return coordinates;
+    }
+
+    getAdjacent(position) {
+        const x = position % this.dimension;
+        const y = Math.floor(position / this.dimension);
+        
+        const adj = [];
+        if (x - 1 > -1) adj.push(position - 1);
+        if (x + 1 < this.dimension - 1) adj.push(position + 1);
+        if (y - 1 > -1) adj.push(position - this.dimension);
+        if (y - 1 < this.dimension - 1) adj.push(position + this.dimension);
+
+        return adj;
     }
 
     mouseListener(event) {
@@ -211,7 +302,7 @@ class Board extends Component {
              onMouseDown={this.mouseListener}
              onKeyDown={this.keyDownListener}
              onKeyUp={this.keyUpListener}>
-            <Avatar id="Occupant" color={DEFAULT_COLOR} isHidden={!this.white}
+            <Avatar id="Occupant" color={DEFAULT_COLOR} isHidden={!this.white || this.rules.shielding}
                     x={this.state.ox}
                     y={this.state.oy}/>
             <Avatar id="User" color={this.white ? "white" : "black"}

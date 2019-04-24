@@ -5,7 +5,11 @@ class Player {
     queue = [];
     times = [];
 
-    play(key) {
+    constructor() {
+        this.play = this.play.bind(this);
+    }
+
+    play(key, num=1) {
         const sound = getSound(key);
         if (!sound) return;
         
@@ -21,6 +25,12 @@ class Player {
         if (this.recording) {
             this.queue.push(key);
             this.times.push((new Date()).getTime());
+        }
+
+        if (num > 1) {
+            for (let i = 0; i <  num; i++) {
+                setTimeout(() => this.play(key), i * 250)
+            }
         }
     }
 

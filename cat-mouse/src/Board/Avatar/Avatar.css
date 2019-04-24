@@ -11,5 +11,5 @@
     
     background-color: white;
 
-    transition: top 300ms ease, left 300ms ease, background-color 300ms ease-out;
+    transition: top 300ms ease, left 300ms ease, background-color 300ms ease-out, opacity 300ms ease;
 }
