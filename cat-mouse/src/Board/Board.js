@@ -186,7 +186,7 @@ class Board extends Component {
                 this.synthetic2.forEach(synthesis => {
                     if (this.arrayComp(this.synthHistory, synthesis.pattern)) {
                         played = true;
-                        this.player.play(synthesis.id);
+                        this.player.play(synthesis.id, 1, position);
                         this.history.pop();
                     }
                 });
@@ -215,7 +215,7 @@ class Board extends Component {
                     this.synthetic1.forEach(synthesis => {
                         if (this.arrayComp(orderedIds, synthesis.pattern)) {
                             played = true;
-                            this.player.play(synthesis.id);
+                            this.player.play(synthesis.id, 1, position);
                             this.synthHistory.push(synthesis.id);
                         }
                     });

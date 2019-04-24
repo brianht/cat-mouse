@@ -3,13 +3,14 @@ import { getSound, getCached } from '../resources';
 class Player {
     recording = false;
     queue = [];
+    pos = [];
     times = [];
 
     constructor() {
         this.play = this.play.bind(this);
     }
 
-    play(key, num=1) {
+    play(key, num=1, pos=-1) {
         const sound = getSound(key);
         if (!sound) return;
         
@@ -24,6 +25,7 @@ class Player {
 
         if (this.recording) {
             this.queue.push(key);
+            this.pos.push(pos > -1 ? pos : key);
             this.times.push((new Date()).getTime());
         }
 
@@ -37,7 +39,7 @@ class Player {
     playRecording(initCallback = null, endCallback = null, speed = 1) {
         const playback = (i) => {
             const key = this.queue[i];
-            if (initCallback) initCallback(key);
+            if (initCallback) initCallback(this.pos[i]);
 
             this.play(key);
 
