@@ -44,8 +44,6 @@ class Board extends Component {
         }
     ]
 
-    orderFunc = (a, b) => a - b;
-
     synthetic1 = [
         {
             id: soundEnum.laser,
@@ -79,8 +77,12 @@ class Board extends Component {
     history = [];
     synthHistory = [];
 
+    orderFunc = (a, b) => a - b;
+
     constructor(props) {
         super(props);
+
+        this.myId = "board" + (new Date).getTime();
 
         this.white = true;
 
@@ -112,6 +114,10 @@ class Board extends Component {
         this.mouseListener = this.mouseListener.bind(this);
         this.keyDownListener = this.keyDownListener.bind(this);
         this.keyUpListener = this.keyUpListener.bind(this);
+    }
+
+    componentDidMount() {
+        document.getElementById(this.myId).focus();
     }
 
     resetState() {
@@ -297,7 +303,7 @@ class Board extends Component {
     
     render() {
         return (
-        <div className="Board" tabIndex="0"
+        <div className="Board" id={this.myId} tabIndex="0"
              style={{backgroundColor: this.state.color}}
              onMouseDown={this.mouseListener}
              onKeyDown={this.keyDownListener}
